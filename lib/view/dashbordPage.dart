@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/model/utilisateur.dart';
+import 'package:flutter_app/view/sendMessageView.dart';
 
 
 class DashboardPage extends StatefulWidget {
@@ -47,7 +48,15 @@ class _DashboardPageState extends State<DashboardPage> {
                          children: <Widget>[
                            TextButton(
                              child: const Text('Message'),
-                             onPressed: () {/* ... */},
+                             onPressed: () {
+                               print(otherUser.uid);
+                               Navigator.push(
+                                 context,
+                                 MaterialPageRoute(
+                                   builder: (context) => SendMessageView(userID: otherUser.uid),
+                                 ),
+                               );
+                             },
                            ),
                            const SizedBox(width: 8),
                            TextButton(
