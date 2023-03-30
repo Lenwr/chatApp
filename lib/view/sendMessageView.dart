@@ -89,23 +89,12 @@ class _SendMessageViewState extends State<SendMessageView> {
     );
   }
 
-   Widget _buildMessageList() {
- /*   return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        child: ListView.builder(
-          reverse: true,
-          itemCount: _messages.length,
-          itemBuilder: (_, int index) => _buildMessage(_messages[index]),
-        ),
-      ),
-    );*/
-
-
+    Widget _buildReceiverMessageList() {
      return StreamBuilder(
        stream: FirebaseFirestore.instance
            .collection('messages')
            .where('RECEIVER', isEqualTo:widget.userID )
+           .where('SENDER', isEqualTo:auth.currentUser!.uid )
            //.orderBy('timestamp', descending: true)
            .snapshots(),
        builder: (context , snap ) {
@@ -130,17 +119,23 @@ class _SendMessageViewState extends State<SendMessageView> {
                itemCount: documents.length,
                itemBuilder: (context,index){
                  Message MessageUser = Message(documents[index]);
-                 return Center(
-                   child: Card(
-                     child: Column(
-                       mainAxisSize: MainAxisSize.min,
-                       children: <Widget>[
-                         ListTile(
-                           leading: Icon(Icons.account_circle_rounded),
-                           title: Text(MessageUser.message ?? ""),
-                           subtitle: Text(''),
+                 return Container(
+                   margin: EdgeInsets.symmetric(vertical: 8.0),
+                   child : Align(
+                     alignment: Alignment.topRight,
+                     child: Container(
+                       padding: EdgeInsets.all(12.0),
+                       decoration: BoxDecoration(
+                         color: Colors.blue,
+                         borderRadius: BorderRadius.circular(16.0),
+                       ),
+                       child: Text(
+                         MessageUser.message ?? "",
+                         style: TextStyle(
+                           color: Colors.white,
+                           fontSize: 16.0,
                          ),
-                       ],
+                       ),
                      ),
                    ),
                  );
@@ -152,33 +147,71 @@ class _SendMessageViewState extends State<SendMessageView> {
          );
        },
      );
-
    }
+ /* Widget _buildSenderMessageList() {
+    return StreamBuilder(
+      stream: FirebaseFirestore.instance
+          .collection('messages')
+          .where('SENDER', isEqualTo:auth.currentUser!.uid )
+      //.orderBy('timestamp', descending: true)
+          .snapshots(),
+      builder: (context , snap ) {
+        List documents = snap.data?.docs ?? [];
+        if (documents.isEmpty) {
+          return CircularProgressIndicator();
+        }
 
+        /*  return ListView(
+           reverse: true,
+           children: snapshot.data!.docs.map((DocumentSnapshot document) {
+             return ListTile(
+               title: Text(document['message']),
+             );
+           }).toList(),
+         );*/
 
+        return Flexible(
+          child: Container(
+            child: ListView.builder(
+              // shrinkWrap: true,
+              itemCount: documents.length,
+              itemBuilder: (context,index){
+                Message MessageUser = Message(documents[index]);
+                return Container(
+                  margin: EdgeInsets.symmetric(vertical: 8.0),
+                  child : Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      child: Text(
+                        MessageUser.message ?? "",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                );
 
-  Widget _buildMessage(String text) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      child: Align(
-        alignment: Alignment.topRight,
-        child: Container(
-          padding: EdgeInsets.all(12.0),
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(16.0),
-          ),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16.0,
+              },
+
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
+
+
   }
+  */
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -192,7 +225,8 @@ class _SendMessageViewState extends State<SendMessageView> {
       ),
       body: Column(
         children: <Widget>[
-          _buildMessageList(),
+          _buildReceiverMessageList(),
+       //   _buildSenderMessageList(),
           _buildTextComposer(),
         ],
       ),

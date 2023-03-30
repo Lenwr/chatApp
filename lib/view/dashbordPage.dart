@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_app/view/sendMessageView.dart';
 
 
 class DashboardPage extends StatefulWidget {
+
   const DashboardPage({Key? key}) : super(key: key);
 
   @override
@@ -13,7 +15,9 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
   final cloudUsers = FirebaseFirestore.instance.collection("users");
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +65,7 @@ class _DashboardPageState extends State<DashboardPage> {
                            const SizedBox(width: 8),
                            TextButton(
                              child: const Text('Appeler'),
-                             onPressed: () {/* ... */},
+                             onPressed: () {},
                            ),
                            const SizedBox(height: 10),
                          ],
