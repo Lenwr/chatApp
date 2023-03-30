@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import '../model/message.dart';
 
 class SendMessageView extends StatefulWidget {
+
   final String userID ;
   const SendMessageView({Key? key, required this.userID}) : super(key: key);
   @override
@@ -9,6 +13,8 @@ class SendMessageView extends StatefulWidget {
 }
 
 class _SendMessageViewState extends State<SendMessageView> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
   final String userID = "";
   final TextEditingController _textController = TextEditingController();
   List<String> _messages = [];
@@ -18,8 +24,9 @@ class _SendMessageViewState extends State<SendMessageView> {
     setState(() {
       _messages.insert(0, text);
     });
+    String uid = auth.currentUser!.uid;
     FirebaseFirestore.instance.collection('messages').add({
-      'SENDER': "",
+      'SENDER': uid,
       'MESSAGE': text,
       'RECEIVER':widget.userID,
     });
@@ -41,6 +48,9 @@ class _SendMessageViewState extends State<SendMessageView> {
           ),
         ],
       ),
+
+
+
       child: Row(
         children: <Widget>[
           Expanded(
@@ -80,7 +90,7 @@ class _SendMessageViewState extends State<SendMessageView> {
   }
 
    Widget _buildMessageList() {
-    return Expanded(
+ /*   return Expanded(
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: ListView.builder(
@@ -89,8 +99,61 @@ class _SendMessageViewState extends State<SendMessageView> {
           itemBuilder: (_, int index) => _buildMessage(_messages[index]),
         ),
       ),
-    );
-  }
+    );*/
+
+
+     return StreamBuilder(
+       stream: FirebaseFirestore.instance
+           .collection('messages')
+           .where('RECEIVER', isEqualTo:widget.userID )
+           //.orderBy('timestamp', descending: true)
+           .snapshots(),
+       builder: (context , snap ) {
+         List documents = snap.data?.docs ?? [];
+         if (documents.isEmpty) {
+           return CircularProgressIndicator();
+         }
+
+       /*  return ListView(
+           reverse: true,
+           children: snapshot.data!.docs.map((DocumentSnapshot document) {
+             return ListTile(
+               title: Text(document['message']),
+             );
+           }).toList(),
+         );*/
+
+         return Flexible(
+           child: Container(
+             child: ListView.builder(
+               shrinkWrap: true,
+               itemCount: documents.length,
+               itemBuilder: (context,index){
+                 Message MessageUser = Message(documents[index]);
+                 return Center(
+                   child: Card(
+                     child: Column(
+                       mainAxisSize: MainAxisSize.min,
+                       children: <Widget>[
+                         ListTile(
+                           leading: Icon(Icons.account_circle_rounded),
+                           title: Text(MessageUser.message ?? ""),
+                           subtitle: Text(''),
+                         ),
+                       ],
+                     ),
+                   ),
+                 );
+
+               },
+
+             ),
+           ),
+         );
+       },
+     );
+
+   }
 
 
 
