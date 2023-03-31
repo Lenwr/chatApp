@@ -45,7 +45,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         ListTile(
                          leading: Icon(Icons.account_circle_rounded),
                          title: Text(otherUser.nom ?? ""),
-                         subtitle: Text(''),
+                         subtitle: Text(otherUser.prenom ?? ""),
                        ),
                        Row(
                          mainAxisAlignment: MainAxisAlignment.end,

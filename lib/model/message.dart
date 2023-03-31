@@ -3,21 +3,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Message {
   //attributs
   late String uid;
-  String? senderId;
-  String? receiverId;
-  String? message;
-
-
-
-
+  late String senderId;
+  late String receiverId;
+  late String message;
+  late DateTime date;
 
   //constructeur
-
  Message.empty(){
     uid = "";
     senderId = "";
    receiverId = "";
     message = "";
+    date = DateTime.now();
   }
 
   Message(DocumentSnapshot snapshot){
@@ -26,6 +23,8 @@ class Message {
     senderId = map["SENDER"];
     receiverId = map["RECEIVER"];
     message = map["MESSAGE"];
+    Timestamp timestamp = map["DATE"];
+    date = timestamp.toDate();
 
   }
 

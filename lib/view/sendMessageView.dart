@@ -17,19 +17,18 @@ class _SendMessageViewState extends State<SendMessageView> {
 
   final String userID = "";
   final TextEditingController _textController = TextEditingController();
-  List<String> _messages = [];
 
   void _handleSubmit(String text) {
     _textController.clear();
-    setState(() {
-      _messages.insert(0, text);
-    });
+
     String uid = auth.currentUser!.uid;
     FirebaseFirestore.instance.collection('messages').add({
       'SENDER': uid,
       'MESSAGE': text,
       'RECEIVER':widget.userID,
+      'DATE': FieldValue.serverTimestamp(),
     });
+
   }
 
   Widget _buildTextComposer() {
@@ -71,14 +70,15 @@ class _SendMessageViewState extends State<SendMessageView> {
             margin: EdgeInsets.only(left: 8.0),
             decoration: BoxDecoration(
               color: Colors.blue,
-              borderRadius: BorderRadius.circular(24.0),
+              borderRadius: BorderRadius.circular(22.0),
             ),
             child: IconButton(
               icon: Icon(Icons.send, color: Colors.white),
               onPressed: () => {
-                print(userID),
+
                 if(_textController.text == "") {
-                  print ("error")
+                  print ("error"),
+                  print(widget.userID),
                 } else
                 _handleSubmit(_textController.text),
               }
@@ -91,17 +91,18 @@ class _SendMessageViewState extends State<SendMessageView> {
 
     Widget _buildReceiverMessageList() {
      return StreamBuilder(
-       stream: FirebaseFirestore.instance
-           .collection('messages')
-           .where('RECEIVER', isEqualTo:widget.userID )
-           .where('SENDER', isEqualTo:auth.currentUser!.uid )
-           //.orderBy('timestamp', descending: true)
+       stream: FirebaseFirestore.instance.collection('messages')
+       .where('RECEIVER', isEqualTo: widget.userID.toString())
+         .orderBy('DATE', descending: true)
            .snapshots(),
        builder: (context , snap ) {
          List documents = snap.data?.docs ?? [];
-         if (documents.isEmpty) {
-           return CircularProgressIndicator();
+         for (var doc in documents) {
+           print(doc['DATE']);
          }
+      if (documents.isEmpty) {
+          print("");}
+
 
        /*  return ListView(
            reverse: true,
@@ -115,14 +116,16 @@ class _SendMessageViewState extends State<SendMessageView> {
          return Flexible(
            child: Container(
              child: ListView.builder(
-               shrinkWrap: true,
+              // shrinkWrap: true,
                itemCount: documents.length,
                itemBuilder: (context,index){
                  Message MessageUser = Message(documents[index]);
                  return Container(
                    margin: EdgeInsets.symmetric(vertical: 8.0),
                    child : Align(
-                     alignment: Alignment.topRight,
+                     alignment: (MessageUser.senderId == auth.currentUser!.uid
+                         ? Alignment.topLeft
+                         : Alignment.topRight),
                      child: Container(
                        padding: EdgeInsets.all(12.0),
                        decoration: BoxDecoration(
@@ -210,9 +213,6 @@ class _SendMessageViewState extends State<SendMessageView> {
   }
   */
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -223,13 +223,15 @@ class _SendMessageViewState extends State<SendMessageView> {
         ),
         backgroundColor: Colors.blue,
       ),
-      body: Column(
+      body:Padding(
+    padding: EdgeInsets.symmetric(horizontal: 16.0), // ajustez la valeur selon vos besoins
+    child: Column(
         children: <Widget>[
           _buildReceiverMessageList(),
-       //   _buildSenderMessageList(),
           _buildTextComposer(),
         ],
       ),
+      )
     );
   }
 
